@@ -3,8 +3,7 @@
 # 12/13/2022
 # Parses JavaScript packs from ROBLOX cdn servers
 
-# https://web.archive.org/web/20150907171853id_/http://js.rbxcdn.com/22700e0941ec9dad21d89a040ff5ed77.js
-
+import os
 import requests
 
 examplePack = """;// bundle: page___test_m
@@ -14,7 +13,7 @@ examplePack = """;// bundle: page___test_m
 console.log("From Test/Test.js!");
 
 ;// ~/Test/Test.js
-console.log("From ~/Test/Test.js");"""
+console.log("From ~/Test/Test.js");""" # TODO: make this have an actual use
 
 def parseBundleName(pack: str = examplePack):
     bundleName = ""
@@ -40,24 +39,50 @@ def findJavaScriptFileInPack(pack: str = examplePack, file: str = "Test/Test.js"
     iterator = iter(lines)
 
     for packLine in lines:
-        next(iterator)
+        next(iterator, None)
         if packLine.startswith(";// " + file):
-            javaScriptFile = next(iterator).strip()
+            javaScriptFile = next(iterator, None).strip()
 
     return javaScriptFile
 
 if __name__ == "__main__":
     javaScriptPack = requests.get(input("Paste the URL to the JavaScript pack here (ex: http://js.rbxcdn.com/pack.js): ")).text
-    outputPath = input("Output path: ")
+    outputPath = input("Output path (ex: C:/parser/located/here/outputPath): ")
 
-    bundleName = parseBundleName(javaScriptPack)
+    if os.path.exists(outputPath):
+        bundleName = parseBundleName(javaScriptPack)
 
-    filesInPack = parseFilesInPack(javaScriptPack)
-    filesAsString = ", ".join(filesInPack)
+        if bundleName != "":
+            filesInPack = parseFilesInPack(javaScriptPack)
+            
+            if len(filesInPack) != 0:
+                filesAsString = ", ".join(filesInPack)
 
-    print("Parsing bundle " + bundleName + " with files " + filesAsString + "...")
+                print("Parsing bundle " + bundleName + " with files " + filesAsString + "...")
 
-    for file in filesInPack:
-        findJavaScriptFileInPack(javaScriptPack, file)
+                for file in filesInPack:
+                    javaScriptFile = findJavaScriptFileInPack(javaScriptPack, file)
+
+                    if javaScriptFile != "":
+                        if file[:1] != "~":
+                            os.makedirs(os.path.dirname(outputPath + "/js/" + file), exist_ok=True)
+
+                            with open(outputPath + "/js/" + file, 'x') as outputFile:
+                                outputFile.write(javaScriptFile)
+                        else:
+                            os.makedirs(os.path.dirname(outputPath + file[1:]), exist_ok=True)
+
+                            with open(outputPath + file[1:], 'x') as outputFile:
+                                outputFile.write(javaScriptFile)
+                    else:
+                        print("Couldn't find file " + file)
+
+                print("Done!")
+            else:
+                print("Invalid bundle")
+        else:
+            print("Invalid bundle")
+    else:
+        print("Invalid output path")
 else:
     exit()
