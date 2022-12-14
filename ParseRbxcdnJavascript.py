@@ -40,9 +40,9 @@ def findJavaScriptFileInPack(pack: str = examplePack, file: str = "Test/Test.js"
     iterator = iter(lines)
 
     for packLine in lines:
-        next(iterator, '')
+        next(iterator)
         if packLine.startswith(";// " + file):
-            javaScriptFile = next(iterator, '').strip()
+            javaScriptFile = next(iterator).strip()
 
     return javaScriptFile
 
