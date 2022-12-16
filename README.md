@@ -1,7 +1,7 @@
 # ParseRbxcdnJavascript
 
-Parses JavaScript packs from rbxcdn
+Parses JavaScript and CSS packs from ROBLOX cdn servers
 
 # Disclaimer
 
-i don't like how i got findJavaScriptFileInPack() working in this but whatever it Works
+this is probably poorly written but i don't Care it Works So far
